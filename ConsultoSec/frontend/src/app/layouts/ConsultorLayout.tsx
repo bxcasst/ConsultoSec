@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
-import { LayoutDashboard, ClipboardList, GraduationCap, LogOut, ChevronDown, KeyRound } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, GraduationCap, FileText, LogOut, ChevronDown, KeyRound } from 'lucide-react';
 import { useAuth } from '../../features/auth/AuthContext';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '../components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '../components/ui/dialog';
@@ -26,6 +26,7 @@ export function ConsultorLayout() {
     { path: '/consultor', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/consultor/auditorias', label: 'Mis auditorías', icon: ClipboardList },
     { path: '/consultor/capacitaciones', label: 'Capacitaciones', icon: GraduationCap },
+    { path: '/consultor/reportes', label: 'Reportes', icon: FileText },
   ];
 
   const isActive = (path: string) => {

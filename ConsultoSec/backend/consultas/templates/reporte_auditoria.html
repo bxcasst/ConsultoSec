@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Integral de Auditoría 5S</title>
+    <style>
+        /* Configuraciones nativas para el PDF en WeasyPrint */
+        @page {
+            size: letter;
+            margin: 2cm 1.5cm 2.5cm 1.5cm;
+            @top-right {
+                content: "Auditoría #" counter(page);
+                font-size: 9px;
+                color: #7f8c8d;
+            }
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10px;
+                color: #2c3e50;
+                border-top: 1px solid #bdc3c7;
+                padding-top: 5px;
+            }
+        }
+        
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; color: #2c3e50; line-height: 1.4; }
+        h1, h2, h3, h4 { color: #1a252f; margin-bottom: 10px; }
+        
+        /* Portada */
+        /* Portada */
+        .cover-page { text-align: center; margin-top: 300px; page-break-after: always; }
+        .cover-title { font-size: 26px; color: #2c3e50; border-bottom: 3px solid #000000; padding-bottom: 15px; margin-bottom: 20px; text-transform: uppercase; }
+        .cover-subtitle { font-size: 16px; color: #7f8c8d; letter-spacing: 1px; }
+        
+        /* Cajas de Información */
+        .info-box { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #000000; margin-bottom: 20px; border-radius: 0 4px 4px 0; }
+        .info-box p { margin: 6px 0; font-size: 11px; }
+        
+        /* Sistema 5S - Beneficios */
+        .benefits-grid { display: block; width: 100%; margin-bottom: 15px; }
+        .benefit-card { background-color: #ecf0f1; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .benefit-title { font-weight: bold; color: #000000; display: block; margin-bottom: 3px; }
+
+        /* Tablas Profesionales con corrección de paginación para WeasyPrint */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
+        th, td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; vertical-align: middle; }
+        th { background-color: #2c3e50; color: #ffffff; font-weight: bold; font-size: 10px; text-transform: uppercase; }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+        
+        /* Badges de Estado */
+        .badge { padding: 4px 6px; border-radius: 3px; font-weight: bold; font-size: 9px; text-align: center; display: inline-block; }
+        .badge-si { background-color: #2ecc71; color: white; }
+        .badge-no { background-color: #e74c3c; color: white; }
+        .badge-parcial { background-color: #f39c12; color: white; }
+        .badge-na { background-color: #95a5a6; color: white; }
+        
+        /* Imágenes */
+        .thumbnail { max-width: 90px; max-height: 90px; border-radius: 4px; object-fit: cover; }
+        
+        /* Utilidades */
+        .page-break { page-break-before: always; }
+        .text-center { text-align: center; }
+        .section-title { border-bottom: 2px solid #2c3e50; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; color: #000000; font-size: 16px;}
+    </style>
+</head>
+<body>
+
+    <!-- PORTADA Y DATOS GENERALES -->
+    <div class="cover-page">
+        <h1 class="cover-title">Reporte Integral de Auditoría y Plan de Mejora Continua</h1>
+        <h2 class="cover-subtitle">Sistema de Gestión ConsultoSec</h2>
+    </div>
+
+    <h2 class="section-title">1. Ficha de Auditoría</h2>
+    <div class="info-box">
+        <p><strong>ID de Consulta:</strong> #{{ consulta.id }}</p>
+        <p><strong>Área / Laboratorio Evaluado:</strong> {{ consulta.area_laboratorio.nombre }}</p>
+        <p><strong>Descripción del Área:</strong> {{ consulta.area_laboratorio.descripcion|default:"Sin descripción en el catálogo." }}</p>
+        <p><strong>Fecha de Generación:</strong> {% now "d \d\e F \d\e Y" %}</p>
+        <p><strong>Estado Actual:</strong> {{ consulta.get_estado_display }}</p>
+        <p><strong>Consultor Responsable:</strong> 
+            {% for responsable in consulta.responsables.all %}
+                {{ responsable.username }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                Sin asignar
+            {% endfor %}
+        </p>
+        <p><strong>Notas Previas:</strong> {{ consulta.notas|default:"Sin observaciones registradas al inicio de la auditoría." }}</p>
+    </div>
+
+    <!-- MARCO METODOLÓGICO 5S -->
+    <h2 class="section-title">2. Metodología de Implementación 5S</h2>
+    <p>La presente auditoría y plan de acción se fundamenta en la metodología japonesa de las 5S, cuyo objetivo es mantener lugares de trabajo ordenados, limpios y eficientes, garantizando seguridad, calidad y productividad en el laboratorio.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Principio</th>
+                <th>Objetivo en el Laboratorio</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Seiri (Clasificar)</strong></td>
+                <td>Separar lo necesario de lo innecesario. Retirar reactivos vencidos, material dañado y clasificar muestras vigentes.</td>
+            </tr>
+            <tr>
+                <td><strong>2. Seiton (Ordenar)</strong></td>
+                <td>Ubicar cada cosa en su lugar. Implementar estantería por tipo de material, etiquetado visible (GHS) y zonas marcadas.</td>
+            </tr>
+            <tr>
+                <td><strong>3. Seiso (Limpiar)</strong></td>
+                <td>Mantener el área impecable. Limpieza diaria de mesas, eliminación de derrames y mantenimiento de equipos.</td>
+            </tr>
+            <tr>
+                <td><strong>4. Seiketsu (Estandarizar)</strong></td>
+                <td>Crear procedimientos (POE), señalización visible y checklist semanales para mantener las tres primeras "S". </td>
+            </tr>
+            <tr>
+                <td><strong>5. Shitsuke (Disciplina)</strong></td>
+                <td>Fomentar la cultura de seguridad mediante auditorías internas, reuniones de seguimiento y capacitación continua.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- RESULTADOS DEL CHECKLIST -->
+    <div class="page-break"></div>
+    <h2 class="section-title">3. Levantamiento de Verificación (Checklist)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 35%;">Requisito / Normativa Aplicable</th>
+                <th style="width: 10%;" class="text-center">Estatus</th>
+                <th style="width: 40%;">Observaciones de Auditoría</th>
+                <th style="width: 15%;" class="text-center">Evidencia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    <strong>{{ item.requisito }}</strong><br>
+                    <span style="font-size: 9px; color: #7f8c8d;">Ref: {{ item.normativa_aplicable|default:"Interna / No especificada" }}</span>
+                </td>
+                <td class="text-center">
+                    {% if item.cumple == 'si' %}<span class="badge badge-si">SÍ</span>
+                    {% elif item.cumple == 'no' %}<span class="badge badge-no">NO</span>
+                    {% elif item.cumple == 'parcial' %}<span class="badge badge-parcial">PARCIAL</span>
+                    {% else %}<span class="badge badge-na">N/E</span>{% endif %}
+                </td>
+                <td><span style="font-size: 10px;">{{ item.observacion|default:"-" }}</span></td>
+                <td class="text-center">
+                    {% if item.imagen %}
+                        <img src="{{ item.imagen.url }}" class="thumbnail" alt="Evidencia">
+                    {% else %}
+                        <span style="color: #bdc3c7; font-size: 9px;">N/A</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No se han registrado ítems de verificación para esta auditoría.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- PLAN DE ACCIÓN Y MEJORA (GANTT) -->
+    <div class="page-break"></div>
+    <h2 class="section-title">4. Cronograma de Acciones Correctivas</h2>
+    <p>Basado en los hallazgos de la auditoría, se propone el siguiente plan de implementación alineado a la metodología 5S y los plazosestablecidos.</p>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 10%;">No. Tarea</th>
+                <th style="width: 30%;">Acción Correctiva</th>
+                <th style="width: 15%;">Fase "S"</th>
+                <th style="width: 15%;">Responsable</th>
+                <th style="width: 18%;">Inicio / Término</th>
+                <th style="width: 12%;" class="text-center">Estatus</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for propuesta in propuestas %}
+            <tr>
+                <td class="text-center"><strong>{{ propuesta.numero_tarea|default:"-" }}</strong><br><span style="font-size: 9px;">{{ propuesta.get_plazo_display }}</span></td>
+                <td><span style="font-size: 10px;">{{ propuesta.accion_correctiva }}</span></td>
+                <td><span style="font-size: 10px;">{{ propuesta.get_s_implementada_display|default:"General" }}</span></td>
+                <td>
+                    <span style="font-size: 10px;">
+                    {% if propuesta.responsables %}
+                        {% for resp in propuesta.responsables %}
+                            {{ resp }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        Por definir
+                    {% endif %}
+                    </span>
+                </td>
+                <td>
+                    <span style="font-size: 9px;">
+                    Inicio: {{ propuesta.fecha_inicio|date:"d/m/Y"|default:"Pendiente" }}<br>
+                    Fin: {{ propuesta.fecha_fin|date:"d/m/Y"|default:"Pendiente" }}<br>
+                    <strong>Duración:</strong> {{ propuesta.duracion_dias }} días
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span style="font-size: 9px; font-weight: bold; color: #2c3e50;">{{ propuesta.get_estado_display }}</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No se han registrado propuestas de mejora correctivas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- REGISTRO DE CAPACITACIONES -->
+    <h2 class="section-title">5. Registro de Capacitaciones y Normatividad</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 35%;">Tema de Capacitación</th>
+                <th style="width: 25%;">Responsable / Instructor</th>
+                <th style="width: 20%;" class="text-center">Fecha Programada</th>
+                <th style="width: 20%;" class="text-center">Total Asistentes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for capacitacion in capacitaciones %}
+            <tr>
+                <td><strong>{{ capacitacion.tema }}</strong><br><span style="font-size: 10px; color: #7f8c8d;">{{ capacitacion.descripcion }}</span></td>
+                <td>{{ capacitacion.responsable }}</td>
+                <td class="text-center">{{ capacitacion.fecha|date:"d/m/Y" }}</td>
+                <td class="text-center">{{ capacitacion.asistentes.count }} Usuarios Registrados</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No hay capacitaciones agendadas para esta auditoría actualmente.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

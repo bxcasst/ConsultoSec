@@ -185,6 +185,7 @@ function TableSection({
                     value={p.fecha_inicio}
                     disabled={isAdmin}
                     onChange={(val) => onUpdate(p.id, { fecha_inicio: val })}
+                    maxDate={p.fecha_fin || undefined}
                     className="w-full shadow-sm"
                   />
                 </td>
@@ -194,6 +195,7 @@ function TableSection({
                     value={p.fecha_fin}
                     disabled={isAdmin}
                     onChange={(val) => onUpdate(p.id, { fecha_fin: val })}
+                    minDate={p.fecha_inicio || undefined}
                     className="w-full shadow-sm"
                   />
                 </td>

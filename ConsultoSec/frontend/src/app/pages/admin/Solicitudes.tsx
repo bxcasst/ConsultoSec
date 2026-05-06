@@ -193,7 +193,7 @@ export function Solicitudes() {
   const filteredSolicitudes = solicitudes
     .filter(sol => {
       const term = searchTerm.toLowerCase();
-      const areaName = (sol.area_nombre ? `${sol.area_nombre} #${sol.id}` : `Consulta #${sol.id}`).toLowerCase();
+      const areaName = (sol.area_nombre ? `${sol.area_nombre} #${sol.id}` : `Auditoría #${sol.id}`).toLowerCase();
       return areaName.includes(term);
     })
     .sort((a, b) => {
@@ -415,7 +415,7 @@ export function Solicitudes() {
                     <div className="space-y-3">
                       <div>
                         <span className="text-[11px] font-bold text-[#003087] uppercase tracking-wider">SOL-{sol.id.toString().padStart(3, '0')}</span>
-                        <h3 className="text-[16px] font-bold text-gray-900 mt-0.5">{sol.area_nombre ? `${sol.area_nombre} #${sol.id}` : `Consulta #${sol.id}`}</h3>
+                        <h3 className="text-[16px] font-bold text-gray-900 mt-0.5">{sol.area_nombre ? `${sol.area_nombre} #${sol.id}` : `Auditoría #${sol.id}`}</h3>
                       </div>
 
                       <div className="flex flex-wrap gap-4 text-[13px] text-gray-600">

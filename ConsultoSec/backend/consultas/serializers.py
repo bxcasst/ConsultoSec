@@ -25,10 +25,12 @@ class ConsultaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SolicitudCreateSerializer(serializers.ModelSerializer):
+    area_nombre = serializers.ReadOnlyField(source='area_laboratorio.nombre')
+    
     class Meta:
         model = Consulta
         # Definimos los campos que el Frontend puede enviar al crear
-        fields = ['id', 'area_laboratorio', 'notas', 'responsables', 'fecha_finalizacion_propuesta', 'estado']
+        fields = ['id', 'area_laboratorio', 'area_nombre', 'notas', 'responsables', 'fecha_finalizacion_propuesta', 'estado']
         
     def validate_area_laboratorio(self, value):
         """

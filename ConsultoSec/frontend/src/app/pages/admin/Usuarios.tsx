@@ -133,10 +133,27 @@ export function Usuarios() {
         }
 
         setIsModalOpen(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        toast.error("No se pudo guardar", {
-          description: <span style={{ color: '#4b5563' }}>Verifica que el correo o usuario no exista ya en el sistema.</span>,
+        const errorMsg = err?.message || '';
+        
+        // Determinar el título y descripción basándose en el tipo de error
+        let title = "No se pudo guardar";
+        let description = "Verifica que los datos sean correctos e intenta de nuevo.";
+        
+        if (errorMsg.includes('nombre de usuario') && errorMsg.includes('correo')) {
+          title = "Usuario y correo duplicados";
+          description = errorMsg;
+        } else if (errorMsg.includes('nombre de usuario')) {
+          title = "Usuario duplicado";
+          description = errorMsg;
+        } else if (errorMsg.includes('correo')) {
+          title = "Correo duplicado";
+          description = errorMsg;
+        }
+        
+        toast.error(title, {
+          description: <span style={{ color: '#4b5563' }}>{description}</span>,
           position: 'top-right',
           classNames: { title: 'text-slate-900', description: 'text-slate-600 font-medium' }
         });

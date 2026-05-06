@@ -294,7 +294,20 @@ const AddTrainingDrawer = ({
   };
 
   const handleGuardar = () => {
-    if (!tema) return toast.warning("El título es obligatorio");
+    // Validar campos obligatorios
+    const missingFields = [];
+    if (!tema.trim()) missingFields.push("Título/Tema");
+    if (!descripcion.trim()) missingFields.push("Descripción");
+    if (!fecha) missingFields.push("Fecha");
+    if (!responsable.trim()) missingFields.push("Responsable");
+    if (selectedLabs.length === 0) missingFields.push("Laboratorios");
+
+    if (missingFields.length > 0) {
+      return toast.warning("Campos obligatorios faltantes", {
+        description: `Por favor completa: ${missingFields.join(", ")}`,
+        position: 'top-right'
+      });
+    }
 
     onSave({
       ...(editingTraining && { id: editingTraining.id }),
@@ -695,9 +708,26 @@ export const CapacitacionesConsultor = () => {
       setTrainings(refreshed);
 
       toast.success(isNew ? "Capacitación registrada correctamente" : "Capacitación actualizada correctamente");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Hubo un error al guardar la capacitación");
+      let errorMessage = "Hubo un error al guardar la capacitación";
+
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (typeof data === 'object') {
+          const details = Object.entries(data)
+            .map(([key, val]) => `${key}: ${Array.isArray(val) ? val.join(", ") : val}`)
+            .join(" | ");
+          if (details) errorMessage += `: ${details}`;
+        }
+      } else if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+
+      toast.error(errorMessage, {
+        position: 'top-right',
+        duration: 5000
+      });
     }
   };
 

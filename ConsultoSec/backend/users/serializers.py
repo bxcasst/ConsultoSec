@@ -10,6 +10,31 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'password', 'role', 'first_name', 'last_name', 'is_active', 'date_joined')
 
+    def validate_username(self, value):
+        """Verificar que el username no esté en uso por otro usuario."""
+        qs = User.objects.filter(username=value)
+        # Si estamos editando, excluir al usuario actual
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                f"El nombre de usuario \"{value}\" ya está registrado en el sistema."
+            )
+        return value
+
+    def validate_email(self, value):
+        """Verificar que el correo no esté en uso por otro usuario."""
+        if not value:
+            return value
+        qs = User.objects.filter(email=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                f"El correo \"{value}\" ya está registrado en el sistema."
+            )
+        return value
+
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],

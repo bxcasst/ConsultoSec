@@ -39,8 +39,32 @@ export const usuariosService = {
       },
       body: JSON.stringify(data),
     });
-    
-    if (!response.ok) throw new Error("Error al crear el usuario");
+
+    if (!response.ok) {
+      // Intentar parsear los errores específicos del backend
+      try {
+        const errorData = await response.json();
+        const messages: string[] = [];
+
+        if (errorData.username) {
+          messages.push(Array.isArray(errorData.username) ? errorData.username[0] : errorData.username);
+        }
+        if (errorData.email) {
+          messages.push(Array.isArray(errorData.email) ? errorData.email[0] : errorData.email);
+        }
+
+        if (messages.length > 0) {
+          throw new Error(messages.join(' '));
+        }
+
+        // Si hay otros errores no mapeados
+        const allMessages = Object.values(errorData).flat().join(' ');
+        if (allMessages) throw new Error(allMessages);
+      } catch (e) {
+        if (e instanceof Error && e.message !== 'Error al crear el usuario') throw e;
+      }
+      throw new Error("Error al crear el usuario");
+    }
     return response.json();
   },
 
@@ -54,7 +78,7 @@ export const usuariosService = {
       },
       body: JSON.stringify({ is_active: isActive }),
     });
-    
+
     if (!response.ok) throw new Error("Error al actualizar el estado del usuario");
     return response.json();
   },
@@ -69,8 +93,30 @@ export const usuariosService = {
       },
       body: JSON.stringify(data),
     });
-    
-    if (!response.ok) throw new Error("Error al actualizar el usuario");
+
+    if (!response.ok) {
+      try {
+        const errorData = await response.json();
+        const messages: string[] = [];
+
+        if (errorData.username) {
+          messages.push(Array.isArray(errorData.username) ? errorData.username[0] : errorData.username);
+        }
+        if (errorData.email) {
+          messages.push(Array.isArray(errorData.email) ? errorData.email[0] : errorData.email);
+        }
+
+        if (messages.length > 0) {
+          throw new Error(messages.join(' '));
+        }
+
+        const allMessages = Object.values(errorData).flat().join(' ');
+        if (allMessages) throw new Error(allMessages);
+      } catch (e) {
+        if (e instanceof Error && e.message !== 'Error al actualizar el usuario') throw e;
+      }
+      throw new Error("Error al actualizar el usuario");
+    }
     return response.json();
   }
 };

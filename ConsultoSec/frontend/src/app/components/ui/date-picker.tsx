@@ -18,6 +18,8 @@ export interface DatePickerProps {
   disabled?: boolean
   className?: string
   placeholder?: string
+  minDate?: string | Date
+  maxDate?: string | Date
 }
 
 export function DatePicker({
@@ -26,6 +28,8 @@ export function DatePicker({
   disabled,
   className,
   placeholder = "Seleccionar fecha",
+  minDate,
+  maxDate,
 }: DatePickerProps) {
   const parseDate = (val: string | Date | null | undefined) => {
     if (!val) return undefined;
@@ -58,6 +62,9 @@ export function DatePicker({
     setOpen(false); // Cerramos el popover al seleccionar
   }
 
+  const fromDate = minDate ? parseDate(minDate) : undefined;
+  const toDate = maxDate ? parseDate(maxDate) : undefined;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -84,6 +91,8 @@ export function DatePicker({
           onSelect={handleSelect}
           initialFocus
           locale={es}
+          fromDate={fromDate}
+          toDate={toDate}
         />
       </PopoverContent>
     </Popover>

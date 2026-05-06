@@ -58,10 +58,23 @@ export function Seguimiento() {
   const handleUpdate = async (id: number, data: Partial<PropuestaMejora>) => {
     if (!token || isAdmin) return;
     try {
+      // Validación: fecha_inicio no puede ser mayor que fecha_fin
+      const p = propuestas.find(x => x.id === id);
+      if (p) {
+        const newStart = data.fecha_inicio ?? p.fecha_inicio;
+        const newEnd = data.fecha_fin ?? p.fecha_fin;
+        if (newStart && newEnd && newStart > newEnd) {
+          toast.error('Fecha inválida', {
+            description: 'La fecha de inicio no puede ser posterior a la fecha de fin.',
+            position: 'top-right',
+          });
+          return;
+        }
+      }
+
       // Optimizamos: Calculamos la duración localmente para que la tabla se actualice en tiempo real
       let updatedData = { ...data };
       if (data.fecha_inicio || data.fecha_fin) {
-        const p = propuestas.find(x => x.id === id);
         if (p) {
           const start = new Date(data.fecha_inicio || p.fecha_inicio || '');
           const end = new Date(data.fecha_fin || p.fecha_fin || '');

@@ -210,7 +210,12 @@ export const consultasService = {
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error("Error al crear la capacitación");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error: any = new Error("Error al crear la capacitación");
+      error.response = { data: errorData };
+      throw error;
+    }
     return response.json();
   },
 
@@ -224,7 +229,12 @@ export const consultasService = {
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error("Error al actualizar la capacitación");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error: any = new Error("Error al actualizar la capacitación");
+      error.response = { data: errorData };
+      throw error;
+    }
     return response.json();
   },
 
@@ -313,6 +323,17 @@ export const consultasService = {
       },
     });
     if (!response.ok) throw new Error("Error al eliminar la propuesta de mejora");
+  },
+
+  async descargarPDF(token: string, id: number): Promise<Blob> {
+    const response = await fetch(`${API_URL}/solicitudes/${id}/pdf/`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      },
+    });
+    if (!response.ok) throw new Error("Error al descargar el PDF");
+    return response.blob();
   },
 
   async eliminarConsulta(token: string, id: number): Promise<void> {

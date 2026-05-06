@@ -42,6 +42,7 @@ export function Checklist() {
   const [isSavingInProgress, setIsSavingInProgress] = useState(false);
   const [isFinalizarModalOpen, setIsFinalizarModalOpen] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [nuevaCatNombre, setNuevaCatNombre] = useState('');
   const [preguntasDinamicas, setPreguntasDinamicas] = useState<any[]>([]);
   const [ultimoIdAgregado, setUltimoIdAgregado] = useState('');
@@ -66,6 +67,35 @@ export function Checklist() {
       setLoading(false);
     }
   }, [token, idFromUrl]);
+
+  // Filtrado de items (incluyendo preguntas dinámicas)
+  const itemsFiltrados = [
+    ...(consulta?.items_checklist || []),
+    ...preguntasDinamicas
+  ].filter(item => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    const texto = item.requisito || item.pregunta || '';
+    const norma = item.normativa_aplicable || '';
+    const cat = item.categoria || '';
+    
+    return (
+      texto.toLowerCase().includes(term) ||
+      norma.toLowerCase().includes(term) ||
+      cat.toLowerCase().includes(term)
+    );
+  });
+
+  // Agrupación por categoría (usando los items filtrados)
+  const secciones = itemsFiltrados.reduce((acc: any[], curr) => {
+    const existing = acc.find(c => c.categoria === curr.categoria);
+    if (existing) {
+      existing.preguntas.push(curr);
+    } else {
+      acc.push({ categoria: curr.categoria, preguntas: [curr] });
+    }
+    return acc;
+  }, []);
 
   const handleRespuesta = (item: ChecklistItem, valor: 'si' | 'no' | 'parcial' | 'no_evaluado') => {
     if (!consulta || !token) return;
@@ -166,7 +196,7 @@ export function Checklist() {
   if (!labFromUrl || !idFromUrl || !consulta) {
     return (
       <div className="p-8 max-w-3xl mx-auto mt-20 text-center">
-        <Card className="p-12 border-dashed border-2 border-gray-300 bg-white">
+        <Card className="p-12 border-dashed border-2 border-gray-200 bg-white">
           <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-[20px] font-bold text-gray-900">Acceso Restringido o No Encontrado</h2>
           <p className="text-[15px] text-gray-500 mt-2 mb-8">
@@ -206,33 +236,12 @@ export function Checklist() {
   const eliminarPregunta = (id: string) => {
     setPreguntasDinamicas(prev => prev.filter(q => q.id !== id));
   };
-  // Agrupación por categoría
-  const secciones = consulta.items_checklist.reduce((acc: any[], curr) => {
-    // Find if we already created this category
-    const existing = acc.find(c => c.categoria === curr.categoria);
-    if (existing) {
-      existing.preguntas.push(curr);
-    } else {
-      acc.push({ categoria: curr.categoria, preguntas: [curr] });
-    }
-    return acc;
-  }, []);
-
-  const seccionesAgrupadas = preguntasDinamicas.reduce((acc: any[], curr) => {
-    const sectionIndex = acc.findIndex(s => s.categoria === curr.categoria);
-    if (sectionIndex !== -1) {
-      acc[sectionIndex].preguntas.push(curr);
-    } else {
-      acc.push({ categoria: curr.categoria, preguntas: [curr] });
-    }
-    return acc;
-  }, []);
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
       {/* Header informativo renovado */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-[#E8E8E8] shadow-sm">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-xl border border-[#E8E8E8] shadow-sm">
+        <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
               <ClipboardCheck className="w-5 h-5 text-[#003087]" />
@@ -244,6 +253,27 @@ export function Checklist() {
             <span className="mx-3 text-gray-300">|</span>
             Folio: <strong className="text-[#003087]">{idFromUrl}</strong>
           </p>
+        </div>
+
+        {/* Buscador Integrado */}
+        <div className="w-full lg:w-80 relative group">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+            <LayoutGrid className="w-4 h-4 text-gray-400 group-focus-within:text-[#003087] transition-colors" />
+          </div>
+          <Input 
+            placeholder="Buscar por pregunta o categoría..."
+            className="pl-10 h-11 border-[#E8E8E8] bg-gray-50/50 focus:bg-white transition-all rounded-xl text-[14px]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+            >
+              <XCircle className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -325,11 +355,17 @@ export function Checklist() {
                         </Label>
                         <Textarea
                           placeholder="Escribe aquí los detalles del hallazgo..."
-                          className="bg-white border-[#E8E8E8] text-[13px] resize-none"
+                          className="bg-white border-[#E8E8E8] text-[13px] resize-none w-full break-all"
                           rows={2}
                           value={q.observacion || ''}
+                          maxLength={128}
                           onChange={(e) => handleNota(q, e.target.value)}
                         />
+                        <div className="flex justify-end">
+                          <span className={`text-[10px] font-medium ${(q.observacion || '').length >= 120 ? 'text-red-500' : 'text-gray-400'}`}>
+                            {(q.observacion || '').length}/128
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Card>
